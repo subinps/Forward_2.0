@@ -23,7 +23,7 @@
       "value": ""
     },
     "BOT_USERNAME": {
-      "description": "Username of your Bot withou @ , Only give if you want auto starts forwarding when heroku restarts",
+      "description": "Username of your Bot without @ , Only give if you want auto starts forwarding when heroku restarts",
       "value": "",
       "required": false
     },
