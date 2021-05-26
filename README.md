@@ -4,7 +4,7 @@
 * Can be used for both private and Public channels.
 * Bot Index message from channel and saves to database, further forwards and deletes each messages from database.Use of database was to Remove duplicacy of files.
 * For Private channels User account is used to copy messages, hence will be slow, to avoid ban.
-* For Public Channels Bot is used to forward , Thanks to [DⱥℝkAngel](https://github.com/Jijinr) for his [Frwdit](https://github.com/Jijinr/Frwdit)
+* For Public Channels Bot is used to forward , Thanks to [DⱥℝkAngel](https://github.com/Jijinr) for his [Frwdit](https://github.com/Jijinr/Frwdit).
 
 ### Deploy to Heroku
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/subinps/Forward_2.0)
