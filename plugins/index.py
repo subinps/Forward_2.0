@@ -80,7 +80,7 @@ async def run(bot, message):
 
     while True:
         try:
-            SKIP = await bot.ask(text = "Send me from where you want to start forwarding\nSend 0 for from begining.", chat_id = message.from_user.id, filters=filters.text, timeout=30)
+            SKIP = await bot.ask(text = "Send me from where you want to start forwarding\nSend 0 for from beginning.", chat_id = message.from_user.id, filters=filters.text, timeout=30)
             print(SKIP.text)
         except TimeoutError:
             await bot.send_message(message.from_user.id, "Error!!\n\nRequest timed out.\nRestart by using /index")
@@ -133,7 +133,7 @@ async def cb_handler(bot: Client, query: CallbackQuery):
     await query.message.delete()
     while True:
         try:
-            get_caption = await bot.ask(text = "Bo you need a custom caption?\nIf yes , Send me caption \nif No send '0'", chat_id = query.from_user.id, filters=filters.text, timeout=30)
+            get_caption = await bot.ask(text = "Do you need a custom caption?\n\nIf yes , Send me caption \n\nif No send '0'", chat_id = query.from_user.id, filters=filters.text, timeout=30)
         except TimeoutError:
             await bot.send_message(query.from_user.id, "Error!!\n\nRequest timed out.\nRestart by using /index")
             return
