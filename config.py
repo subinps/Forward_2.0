@@ -9,7 +9,7 @@ class Config:
     OWNER_ID = os.environ.get("OWNER_ID", "")
     DATABASE_URI = os.environ.get("DATABASE_URI", "")
     DATABASE_NAME = os.environ.get("DATABASE_NAME","Cluster0")
-    COLLECTION_NAME = os.environ.get('COLLECTION_NAME', 'Forward_files')
+    COLLECTION_NAME = os.environ.get('COLLECTION_NAME', 'Forward_data')
     SESSION = os.environ.get("SESSION", "Forward_Session")
     TO_CHANNEL = int(os.environ.get("TO_CHANNEL", ""))
     BOT_USERNAME= os.environ.get("BOT_USERNAME", None)

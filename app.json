@@ -41,7 +41,7 @@
     },
     "COLLECTION_NAME": {
       "description": "Database Collection Name",
-      "value": "Forward_files",
+      "value": "Forward_data",
       "required": false
     },
     "OWNER_ID": {

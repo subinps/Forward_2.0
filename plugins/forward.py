@@ -6,7 +6,7 @@ from config import Config
 import asyncio
 from pyrogram.errors import FloodWait
 import random
-
+from pyrogram.errors.exceptions.bad_request_400 import FileReferenceEmpty, FileReferenceExpired, MediaEmpty
 import pytz
 from datetime import datetime
 
@@ -52,19 +52,28 @@ async def forward(bot, message):
         data = await get_search_results()
         for msg in data:
             channel=msg.channel
+            file_id=msg.id
             message_id=msg.message_id
             methord = msg.methord
             caption = msg.caption
+            file_type = msg.file_type
             chat_id=Config.TO_CHANNEL
             if methord == "bot":
                 try:
-                    await bot.copy_message(
-                        chat_id=chat_id,
-                        from_chat_id=channel,
-                        parse_mode="md",
-                        caption=caption,
-                        message_id=message_id
-                        )
+                    if file_type in ("document", "video", "audio", "photo"):
+                        await bot.send_cached_media(
+                            chat_id=chat_id,
+                            file_id=file_id,
+                            caption=caption
+                            )
+                    else:
+                        await bot.copy_message(
+                            chat_id=chat_id,
+                            from_chat_id=channel,
+                            parse_mode="md",
+                            caption=caption,
+                            message_id=message_id
+                            )
                     await asyncio.sleep(1)
                     try:
                         status.add(1)
@@ -76,13 +85,20 @@ async def forward(bot, message):
                         pass
                 except FloodWait as e:
                     await asyncio.sleep(e.x)
-                    await bot.copy_message(
-                        chat_id=chat_id,
-                        from_chat_id=channel,
-                        parse_mode="md",
-                        caption=caption,
-                        message_id=message_id
-                        )
+                    if file_type in ("document", "video", "audio", "photo"):
+                        await bot.send_cached_media(
+                            chat_id=chat_id,
+                            file_id=file_id,
+                            caption=caption
+                            )
+                    else:
+                        await bot.copy_message(
+                            chat_id=chat_id,
+                            from_chat_id=channel,
+                            parse_mode="md",
+                            caption=caption,
+                            message_id=message_id
+                            )
                     await asyncio.sleep(1)
 
 
@@ -92,6 +108,7 @@ async def forward(bot, message):
                 await Data.collection.delete_one({
                     'channel': channel,
                     'message_id': message_id,
+                    'file_type': file_type,
                     'methord': "bot",
                     'use': "forward"
                     })
@@ -110,23 +127,93 @@ async def forward(bot, message):
                     if acount:
                         if bcount:
                             if ccount:
-                                try:
-                                    await bot.USER.copy_message(
-                                        chat_id=chat_id,
-                                        from_chat_id=channel,
-                                        parse_mode="md",
-                                        caption=caption,
-                                        message_id=message_id
-                                        )
-                                except Exception as e:
-                                    await bot.send_message(chat_id=OWNER, text=f"LOG-Error: {e}")
-                                    print(e)
-                                    pass
-                                result=await Data.collection.delete_one({
+                                if file_type in ("document", "video", "audio", "photo"):
+                                    try:
+                                        await bot.USER.send_cached_media(
+                                            chat_id=chat_id,
+                                            file_id=file_id,
+                                            caption=caption
+                                            )
+                                    except FileReferenceExpired:
+                                        try:
+                                            fetch = await bot.USER.get_messages(channel, message_id)
+                                            print("Fetching file_id")
+                                            try:
+                                                for file_type in ("document", "video", "audio", "photo"):
+                                                    media = getattr(fetch, file_type, None)
+                                                    if media is not None:
+                                                        file_idn=media.file_id
+                                                        break
+                                                await bot.USER.send_cached_media(chat_id=chat_id, file_id=file_idn, caption=caption)
+                                            except Exception as e:
+                                                print(e)
+                                                await bot.send_message(OWNER, f"LOG-Error-{e}")
+                                                pass
+                                        except:
+                                            await bot.send_message(chat_id=OWNER, text=f"LOG-Error: {e}")
+                                            print(e)
+                                            pass
+                                    except FileReferenceEmpty:
+                                        try:
+                                            fetch = await bot.USER.get_messages(channel, message_id)
+                                            print("Fetching file_ref")
+                                            for file_type in ("document", "video", "audio", "photo"):
+                                                media = getattr(fetch, file_type, None)
+                                                if media is not None:
+                                                    file_idn=media.file_id
+                                                    break
+                                            try:
+                                                await bot.USER.send_cached_media(chat_id=chat_id, file_id=file_idn, caption=caption)
+                                            except Exception as e:
+                                                print(e)
+                                                await bot.send_message(chat_id=OWNER, text=f"LOG-Error: {e}")
+                                                pass
+                                        except:
+                                            await bot.send_message(chat_id=OWNER, text=f"LOG-Error: {e}")
+                                            print(e)
+                                            pass
+                                    except MediaEmpty:
+                                        try:
+                                            fetch = await bot.USER.get_messages(channel, message_id)
+                                            for file_type in ("document", "video", "audio", "photo"):
+                                                media = getattr(fetch, file_type, None)
+                                                if media is not None:
+                                                    file_idn=media.file_id
+                                                    break
+                                            try:
+                                                await bot.USER.send_cached_media(chat_id=chat_id, file_id=file_idn, caption=caption)
+                                            except Exception as e:
+                                                print(e)
+                                                await bot.send_message(chat_id=OWNER, text=f"LOG-Error: {e}")
+                                                pass
+                                        except:
+                                            await bot.send_message(chat_id=OWNER, text=f"LOG-Error: {e}")
+                                            print(e)
+                                            pass
+                                    except Exception as e:
+                                        print(e)
+                                        await bot.send_message(chat_id=OWNER, text=f"LOG-Error: {e}")
+                                        pass
+                                else:
+                                    try:
+                                        await bot.USER.copy_message(
+                                            chat_id=chat_id,
+                                            from_chat_id=channel,
+                                            parse_mode="md",
+                                            caption=caption,
+                                            message_id=message_id
+                                            )
+                                    except Exception as e:
+                                        await bot.send_message(chat_id=OWNER, text=f"LOG-Error: {e}")
+                                        print(e)
+                                        pass
+
+                                await Data.collection.delete_one({
                                     'channel': str(channel),
                                     'message_id': message_id,
                                     'methord': "user",
-                                    'use': "forward"
+                                    'use': "forward",
+                                    'file_type': file_type
                                     })
                                 try:
                                     status.add(1)
@@ -142,7 +229,7 @@ async def forward(bot, message):
                                 acount -= 1
                                 bcount -= 1
                                 MessageCount += 1
-                                mainsleep=random.randint(3, 7)
+                                mainsleep=random.randint(3, 8)
                                 try:
                                     datetime_ist = datetime.now(IST)
                                     ISTIME = datetime_ist.strftime("%I:%M:%S %p - %d %B %Y")

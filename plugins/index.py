@@ -152,31 +152,41 @@ async def cb_handler(bot: Client, query: CallbackQuery):
     mcount = 0
     FROM=channel_id_
     try:
-        async for msg in bot.USER.search_messages(chat_id=FROM,offset=skip_no,filter=filter):
+        async for MSG in bot.USER.search_messages(chat_id=FROM,offset=skip_no,filter=filter):
             if channel_type == "public":
                 methord="bot"
                 channel=FROM
+                msg=await bot.get_messages(FROM, MSG.message_id)
             elif channel_type == "private":
                 methord="user"
                 channel=str(FROM)
+                msg=await bot.USER.get_messages(FROM, MSG.message_id)
             msg_caption=""
             if caption is not None:
                 msg_caption=caption
             elif msg.caption:
                 msg_caption=msg.caption
-            if filter == "document":
-                id=msg.document.file_id
-            elif filter == "photo":
-                id=msg.photo.file_id
-            elif filter == "video":
-                id=msg.video.file_id
-            elif filter == "audio":
-                id=msg.audio.file_id
-            elif filter == "empty":
-                id=f"{FROM}_{msg.message_id}"
+            if filter in ("document", "video", "audio", "photo"):
+                for file_type in ("document", "video", "audio", "photo"):
+                    media = getattr(msg, file_type, None)
+                    if media is not None:
+                        file_type = file_type
+                        id=media.file_id
+                        break
+            if filter == "empty":
+                for file_type in ("document", "video", "audio", "photo"):
+                    media = getattr(msg, file_type, None)
+                    if media is not None:
+                        file_type = file_type
+                        id=media.file_id
+                        break
+                else:
+                    id=f"{FROM}_{msg.message_id}"
+                    file_type="others"
+            
             message_id=msg.message_id
             try:
-                await save_data(id, channel, message_id, methord, msg_caption)
+                await save_data(id, channel, message_id, methord, msg_caption, file_type)
             except Exception as e:
                 print(e)
                 await bot.send_message(OWNER, f"LOG-Error-{e}")
