@@ -13,7 +13,7 @@ import logging
 logging.basicConfig(format='[%(levelname) 5s/%(asctime)s] %(name)s: %(message)s',
                     level=logging.ERROR)
 
-                 
+limit_no=""               
 skip_no=""
 caption=""
 channel_type=""
@@ -92,6 +92,20 @@ async def run(bot, message):
         except:
             await SKIP.reply_text("Thats an invalid ID, It should be an integer.")
             continue
+    while True:
+        try:
+            LIMIT = await bot.ask(text = "Send me from Upto what extend(LIMIT) do you want to Index\nSend 0 for all messages.", chat_id = message.from_user.id, filters=filters.text, timeout=30)
+            print(LIMIT.text)
+        except TimeoutError:
+            await bot.send_message(message.from_user.id, "Error!!\n\nRequest timed out.\nRestart by using /index")
+            return
+        try:
+            global limit_no
+            limit_no=int(LIMIT.text)
+            break
+        except:
+            await LIMIT.reply_text("Thats an invalid ID, It should be an integer.")
+            continue
 
     buttons=InlineKeyboardMarkup(
         [
@@ -152,7 +166,7 @@ async def cb_handler(bot: Client, query: CallbackQuery):
     mcount = 0
     FROM=channel_id_
     try:
-        async for MSG in bot.USER.search_messages(chat_id=FROM,offset=skip_no,filter=filter):
+        async for MSG in bot.USER.search_messages(chat_id=FROM,offset=skip_no,limit=limit_no,filter=filter):
             if channel_type == "public":
                 methord="bot"
                 channel=FROM
