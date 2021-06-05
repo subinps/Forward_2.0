@@ -34,6 +34,18 @@ async def total(bot, message):
     except Exception as e:
         await msg.edit(f'Error: {e}')
 
+        
+@Client.on_message(filters.command('cleardb'))
+async def clrdb(bot, message):
+    msg = await message.reply("Clearing files from DB...", quote=True)
+    try:
+        await Data.collection.drop()
+        await msg.edit(f'Cleared DB')
+    except Exception as e:
+        await msg.edit(f'Error: {e}')
+                
+        
+
 @Client.on_message(filters.command("forward"))
 async def forward(bot, message):
     if 1 in status:
